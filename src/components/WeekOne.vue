@@ -26,21 +26,21 @@
             }}<button @click="item.qty++">+</button>
           </td>
           <td>
-            <button @click="edit(item)">編輯</button>
-            <button @click="delete item.id">刪除</button>
+            <button @click="editItem(item)">編輯</button>
+            <button @click="delItem(item)">刪除</button>
           </td>
         </tr>
       </tbody>
     </table>
     <div class="edit">
       <div v-if="startEdit">
-        <p>編輯：{{ editTemp.name }}</p>
-        品項<input type="text" :v-model="editTemp.name" :placeholder="editTemp.name" />
-        描述<input type="text" :v-model="editTemp.description" :placeholder="editTemp.description" />
-        價格<input type="number" :v-model="editTemp.price" :placeholder="editTemp.price" />
-        <button>儲存</button>
+        品項<input type="text" v-model="editTemp.name" />
+        描述<input type="text" v-model="editTemp.description" />
+        價格<input type="number" v-model="editTemp.price" />
+        <button @click="saveItem()">儲存</button>
         <button @click="cancel">取消</button>
       </div>
+      <div v-else><button type="button" @click="editItem()">新增一筆</button></div>
     </div>
   </div>
 </template>
@@ -104,15 +104,31 @@ const data = ref([
     qty: 20
   }
 ])
-const editTemp = ref([])
+const editTemp = ref({})
 const startEdit = ref(false)
-const edit = (item) => {
+const editItem = (item={}) => {
   startEdit.value = true
-  editTemp.value = { ...item }
+  editTemp.value = (item) ? { ...item } : {}
+}
+const delItem = (del) => {
+  const index = data.value.findIndex((item) => item.id === del.id)
+  data.value.splice(index, 1)
+}
+const saveItem = () => {
+  if (editTemp.value.id){
+    const index = data.value.findIndex((item) => item.id === editTemp.value.id)
+    data.value[index] = editTemp.value
+  }else{
+    editTemp.value.id = new Date().getTime()
+    editTemp.value.qty = 0
+    data.value.push(editTemp.value)
+  }
+  
+  editTemp.value = {}
 }
 const cancel = () => {
   startEdit.value = false
-  editTemp.value = []
+  editTemp.value = {}
 }
 </script>
 <style>
